@@ -1,0 +1,40 @@
+🚀 Overview
+    1.The agent acts as a "digital secretary" that eliminates the need for manual note-taking. It is designed to:
+    2.Ingest: Receive transcripts via Webhook, Google Drive, or YouTube URLs.
+    3.Analyze: Use AI to identify core themes, specific decisions, and assigned tasks.
+    4.Distribute: Send the final summary to your preferred destination (Gmail, Slack, Notion, or a Database).
+
+
+🛠️ Workflow Architecture
+    1.The workflow typically utilizes the following n8n nodes:
+    2.Trigger Node: (Webhook/Google Drive) Detects new transcripts or audio files.
+    3.AI Agent (LangChain): The central logic handler that orchestrates the summarization process
+    4.LLM Model: (OpenAI GPT-4o / Google Gemini) Powers the natural language understanding and synthesis.
+
+
+*Output Tools:
+     1.Notion/Google Docs: For archiving structured notes.
+     2.Gmail/Slack: For instant team notifications.
+     3.HTTP Request: To push data to external CRMs or internal tools.
+
+
+✨ Key Features
+     1.Automated Action Item Extraction: Automatically identifies phrases like "I will..." or "Let's make sure to..." and lists them as tasks.
+     2.Sentiment Analysis: Gauges the "vibe" of the conversation (e.g., positive, concerned, or urgent).
+     3.Multi-Format Support: Can be configured to handle YouTube links, meeting recordings, or simple text files.
+     4.Token Optimization: Intelligent prompt engineering to summarize long transcripts without hitting model context limits.
+
+
+⚙️ Setup & Prerequisites
+    -To deploy this agent, you will need:
+       1.n8n Instance: (Self-hosted or Cloud).
+       2.AI API Key: OpenAI (for Whisper/GPT) or Google Gemini API.
+       3.Integrations: Access tokens for your destination apps (Notion, Slack, etc.).
+
+
+📖 Usage
+     1.Import the .json file into your n8n canvas.
+     2.Configure Credentials for the AI and Storage nodes.
+     3.Activate the workflow.
+     4.Trigger: Send a transcript via the designated entry point (e.g., uploading a file to a specific Drive folder).
+
