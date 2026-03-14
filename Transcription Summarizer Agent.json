@@ -1,0 +1,257 @@
+{
+  "name": "Transcription Summarizer Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -384,
+        -80
+      ],
+      "id": "60d78542-f324-44e0-9bc2-f7c20a10506b",
+      "name": "When chat message received",
+      "webhookId": "e5898dcc-5804-4acb-8ec3-547b4442ffd9"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.snippet.description }}",
+        "options": {
+          "systemMessage": "You are a document processor and summarizer. Your job is to create a document with original content and summary, then return the summary content to the user.\nStep-by-Step Execution Flow:\n\nCreate Document: Use \"Create document\" tool to create a new Google Doc\nAdd Original Content: Use \"Update document\" tool to add the user's provided text\nGenerate Summary: Analyze the content and create a comprehensive summary with bullet points covering:\n• Key themes and main points\n• Important details and insights\n• Action items or next steps\n• Conclusions and recommendations\n• Notable data or statistics\nAdd Summary to Document: Use \"Update document\" tool again to append the summary section to the document\nRetrieve Final Content: Use \"get document\" tool to fetch the complete document content including both original text and summary\nReturn Summary: Extract and return the summary portion from the retrieved document content to the user\n\nImportant Instructions:\n\nAlways use \"get document\" at the end to retrieve the full content\nExtract and display the summary section in your response to the user\nProvide both the document link AND the summary content in your output\nFormat the summary clearly with bullet points for easy reading\n\nOutput Format:\n\"Here is your document: [link]\nSUMMARY:\n\nPoint 1\nPoint 2\nPoint 3\n[etc.]\""
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        408,
+        -80
+      ],
+      "id": "91ba84be-69bb-43ac-b824-2c6fef36ba7c",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        288,
+        144
+      ],
+      "id": "472ca94b-07e7-4a84-a59e-21fc6af6d21c",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "ZcEbdlPkNwMBJvPd",
+          "name": "Google Gemini(PaLM) Api account 7360"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "folderId": "1B_tY_OENeIvcdU7FfviOwUSf-1bp5l4_",
+        "title": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Title', ``, 'string') }}"
+      },
+      "type": "n8n-nodes-base.googleDocsTool",
+      "typeVersion": 2,
+      "position": [
+        416,
+        144
+      ],
+      "id": "fd0f795a-01a1-4883-ba4e-a40802bec678",
+      "name": "Create a document in Google Docs",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "mmtq1J5iBzkHeqW8",
+          "name": "Google Docs account 607"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Doc_ID_or_URL', ``, 'string') }}",
+        "actionsUi": {
+          "actionFields": [
+            {
+              "action": "insert",
+              "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('actionFields0_Text', ``, 'string') }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDocsTool",
+      "typeVersion": 2,
+      "position": [
+        544,
+        144
+      ],
+      "id": "2fc769a2-54c9-4d18-be2e-f185271b7d1b",
+      "name": "Update a document in Google Docs",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "mmtq1J5iBzkHeqW8",
+          "name": "Google Docs account 607"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "documentURL": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Doc_ID_or_URL', ``, 'string') }}"
+      },
+      "type": "n8n-nodes-base.googleDocsTool",
+      "typeVersion": 2,
+      "position": [
+        672,
+        144
+      ],
+      "id": "37a119d8-dac5-416f-bb7e-81f63e432d89",
+      "name": "Get a document in Google Docs",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "mmtq1J5iBzkHeqW8",
+          "name": "Google Docs account 607"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "video",
+        "operation": "get",
+        "videoId": "={{ $json.videoId }}",
+        "part": [
+          "*",
+          "snippet",
+          "statistics"
+        ],
+        "options": {}
+      },
+      "type": "n8n-nodes-base.youTube",
+      "typeVersion": 1,
+      "position": [
+        64,
+        -80
+      ],
+      "id": "8d22841f-ec9d-404e-8fb5-460e3eb4a509",
+      "name": "Get a video",
+      "credentials": {
+        "youTubeOAuth2Api": {
+          "id": "vMvR9Fm9BrKHMZXu",
+          "name": "YouTube account 13"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// This tries to find the input in 'text', 'chatInput', or 'message'\nconst input = $json.text || $json.chatInput || $json.message || \"\";\n\nconst regex = /(?:youtube\\.com\\/(?:[^\\/]+\\/.+\\/|(?:v|e(?:mbed)?)\\/|.*[?&]v=)|youtu\\.be\\/)([^\"&?\\/\\s]{11})/;\nconst match = input.match(regex);\n\nif (match && match[1]) {\n  return { videoId: match[1] };\n} else {\n  // If it fails, it will show you exactly what it received so you can debug\n  throw new Error(`Could not find Video ID. I received: \"${input}\"`);\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -160,
+        -80
+      ],
+      "id": "038f969a-6f67-4e98-9be6-284330ef3ac6",
+      "name": "Code in JavaScript"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a document in Google Docs": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update a document in Google Docs": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a document in Google Docs": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a video": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Get a video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "530a25ab-4c66-4a86-8953-700392061192",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "969257b09ad2942bbaff2e2288304f4969030574d109cdeca05bf11f630884df"
+  },
+  "id": "cbA6RIWOFY8j2Z7r",
+  "tags": []
+}
